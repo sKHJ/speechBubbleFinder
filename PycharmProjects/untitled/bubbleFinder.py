@@ -23,7 +23,8 @@ def bubbleChecker(img,x,y,w,h):
     whiterate =(  n_white_pix / (w*h) ) * 100
     if whiterate < 45 :
         return 0
-
+    
+    '''
     #3. two line
     edges = cv2.Canny(img_trim, 0, 0, apertureSize=3)
 
@@ -45,6 +46,7 @@ def bubbleChecker(img,x,y,w,h):
 
     if count < 2:
         return 0
+    '''
 
     return 1
 
