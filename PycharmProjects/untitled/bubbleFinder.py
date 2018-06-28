@@ -121,8 +121,8 @@ def bubbleFinder(image):
         
         if bubbleChecker(thresh,x,y,w,h) == 1 :
           
-            rate1 = int(rW*0.1)
-            rate2 = int(rH*0.1)
+            rate1 = int(w*0.1)
+            rate2 = int(h*0.1)
             rX = x-rate1
             rY = y-rate2
             rW = w+ 2*rate1
