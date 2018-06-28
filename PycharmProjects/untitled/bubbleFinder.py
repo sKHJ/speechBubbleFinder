@@ -10,9 +10,9 @@ def bubbleChecker(img,x,y,w,h):
     #frame size = ( width / 6 ) * (height * 8 )
     #blob_size = ( width / 10 ) * ( height * 8 )
 
-    row = int(img.shape[1] / 60)
+    row = int(img.shape[1] / 60)  #minimal size limit
     col = int(img.shape[0] / 64)
-    if (w < row) | (h < col) :
+    if (w < row) or (h < col) :
         return 0
     if h * 1.5 < w :
         return 0
@@ -24,13 +24,64 @@ def bubbleChecker(img,x,y,w,h):
     if whiterate < 45 :
         return 0
 
- 
+    #3. two line
+    edges = cv2.Canny(img_trim, 0, 0, apertureSize=3)
+
+    minLineLength = (h * 70) / 100  # 크기제한 : 이미지 size 70%이상
+    lines = cv2.HoughLinesP(image=edges, rho=0.02, theta=np.pi / 500, threshold=19,
+                            lines=np.array([]), minLineLength=minLineLength, maxLineGap=50)
+    if lines is None:
+        print(0)
+        return 0
+    a, b, c = lines.shape
+    count = 0
+    for n in range(a):
+        x1 = lines[n][0][0]
+        x2 = lines[n][0][2]
+        if (x2 - x1) == 0:
+            count += 1
+
+    print(count)
+
+    if count < 2:
+        return 0
 
     return 1
 
+def areaCirculator2(list1,list2):       #사각형 좌표 2개를 받아서 겹치는 넓이를 계산함
+                                        #( 겹치는 넓이/ 내가 찾은 사각형 넓이 ) -> 점수 환산
+    if len(list1) ==0:
+        return 0
+    if len(list2) ==0:
+        return 0
+
+    point = []
+
+    point = [list1[0], list1[1],
+             list1[0] + list1[2], list1[1] + list1[3],
+             list2[0], list2[1],
+             list2[0] + list2[2], list2[1] + list2[3]
+             ]
+    num = len(point) // 4
+    point = np.array(point).reshape(num, 4)
+    point = point.astype(int)
+    field = np.zeros((int(max(point[:, 2])), int(max(point[:, 3]))))
+    for i in range(num):
+        field[point[i, 0]:point[i, 2], point[i, 1]:point[i, 3]] = 1
+    #print("면적:%0.2f" % (field.sum() ))
+
+    result = field.sum() - ( field.sum() - list1[2]*list1[3] ) - ( field.sum() - list2[2]*list2[3] )
+    #print("면적:%d" %result )
+
+    score =int ( ( result / (list1[2]*list1[3]) ) * 100)
+
+    #print("점수:%d" %score)
+    #print("---------------------------------")
+    return score
+
 
 # load the image, convert it to grayscale, and blur it
-image = cv2.imread("002.jpg")
+image = cv2.imread("003.jpg")
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 
@@ -83,7 +134,7 @@ cnts = cv2.findContours(mask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 cnts = cnts[0] if imutils.is_cv2() else cnts[1]
 cnts = contours.sort_contours(cnts)[0]
 
-
+data=[]
 # loop over the contours
 for (i, c) in enumerate(cnts):
     # draw the bright spot on the image
@@ -91,7 +142,26 @@ for (i, c) in enumerate(cnts):
     # ((cX, cY), radius) = cv2.minEnclosingCircle(c)
     #cv2.circle(image, (int(cX), int(cY)), int(radius),(0, 0, 255), 3)
     if bubbleChecker(thresh,x,y,w,h) == 1 :
-        cv2.rectangle(image, (x,y),(x+w,y+h),(30, 0, 255), 3)
+        data.append([x,y,w,h])
+        #cv2.rectangle(image, (x,y),(x+w,y+h),(30, 0, 255), 3)
+        #cv2.putText(image, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+
+'''
+    for [x1,y1,w1,h1] in data:
+        l1 = [x1,y1,w1,h1]
+        for [x2, y2, w2, h2] in data:
+            l2 = [x2, y2, w2, h2]
+            if (x1 != x2) and (y1 != y2) :
+
+                if areaCirculator2(l1,l2) >= 80 :
+                    if (w1*h1) > (w2*h2) :
+                        data.remove([x2,y2,w2,h2])
+                    else:
+                        data.remove([x1,y1,w1,h1])
+'''
+
+    for [x,y,w,h] in data:
+        cv2.rectangle(image, (x, y), (x + w, y + h), (30, 0, 255), 3)
         cv2.putText(image, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
 
 
