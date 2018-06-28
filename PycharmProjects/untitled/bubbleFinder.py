@@ -16,6 +16,11 @@ def bubbleChecker(img,x,y,w,h):
         return 0
     if h * 1.5 < w :
         return 0
+    
+    if w > image.shape[1] * 0.9 :
+        return 0
+    if h > image.shape[0] * 0.9 :
+        return 0
 
     #2. white pixel rate limit----------------------
     img_trim = img[y:y + h, x:x + w]
@@ -113,7 +118,25 @@ def bubbleFinder(image):
         (x, y, w, h) = cv2.boundingRect(c)
         # ((cX, cY), radius) = cv2.minEnclosingCircle(c)
         #cv2.circle(image, (int(cX), int(cY)), int(radius),(0, 0, 255), 3)
+        
         if bubbleChecker(thresh,x,y,w,h) == 1 :
+          
+            rate1 = int(rW*0.1)
+            rate2 = int(rH*0.1)
+            rX = x-rate1
+            rY = y-rate2
+            rW = w+ 2*rate1
+            rH = h+ 2*rate2
+            
+            if rX < 0 : 
+                rX = 0
+            if rY < 0 :
+                rY = 0
+            if rX+rW > image.shape[1] :
+                rW = image.shape[1]
+            if rY+rH > image.shape[0] :
+                rH = image.shape[0]
+            
             data.append([x,y,w,h])
             #cv2.rectangle(image, (x,y),(x+w,y+h),(30, 0, 255), 3)
             #cv2.putText(image, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
