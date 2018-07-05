@@ -186,8 +186,8 @@ def bubbleFinder(image):
     for (i, c) in enumerate(cnts):
         # draw the bright spot on the image
         (x, y, w, h) = cv2.boundingRect(c)
-        cv2.rectangle(image, (x, y), (x + w, y + h), (30, 0, 255), 3)
-        cv2.putText(image, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 0, 0), 2)
+        #cv2.rectangle(image, (x, y), (x + w, y + h), (30, 0, 255), 3)
+        #cv2.putText(image, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 0, 0), 2)
         print(i+1,x,y,w,h)
         if bubbleChecker(thresh,i+1,x,y,w,h) == 1 :
             data.append([x,y,w,h])
