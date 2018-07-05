@@ -6,8 +6,8 @@ import imutils
 import cv2
 
 
-location = 'Chapter 006 - Raw/020.jpg'
-#location = '001.jpg'
+location = 'manga/Chapter 067 - raw/006.jpg'
+#location = '000.jpg'
 
 
 def bubbleChecker(img,i,x,y,w,h):
@@ -34,7 +34,7 @@ def bubbleChecker(img,i,x,y,w,h):
 
     n_white_pix = cv2.countNonZero(img_trim)
     whiterate =(  n_white_pix / (w*h) ) * 100
-    if whiterate < 50 :
+    if whiterate < 45 :
         print('%d is deleted by whiterate' % i)
         return 0
 
@@ -96,116 +96,120 @@ def bubbleChecker(img,i,x,y,w,h):
         print('%d is deleted by line' % i)
         return 0
 
-    if vcount > 30:
-        print('%d is deleted by TOO MANY vertical line:%d' % (i,vcount))
-        return 0
+    #if vcount > 30:
+    #    print('%d is deleted by TOO MANY vertical line:%d' % (i,vcount))
+    #    return 0
 
-    if hcount > 5:
+    if hcount > 10:
         print('%d is deleted by TOO MANY horizen line:%d' % (i,hcount))
         return 0
 
-    if dcount > 0 :
+    if dcount > 5 :
         print('%d is deleted by diagonal line:%d' % (i, dcount))
         return 0
 
 
 
-    print('---------%d is selected! line: %d----------' %(i,vcount))
+    print('---------%d is selected! v:%d h:%d d:%d----------' %(i,vcount,hcount,dcount))
     return 1
 
 
-# load the image, convert it to grayscale, and blur it
-#location = '003.jpg'
-image = cv2.imread(location)
-image2 = cv2.imread(location)
 
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+def bubbleFinder(image):
+    # load the image, convert it to grayscale, and blur it
+    #location = '003.jpg'
+    #image = cv2.imread(location)
+    #image2 = cv2.imread(location)
 
-
-#blurred = cv2.GaussianBlur(gray, (11, 11), 0)
-thresh = cv2.threshold(gray, 224, 250, cv2.THRESH_BINARY)[1]
-
-# threshold the image to reveal light regions in the
-# blurred image
-
-# perform a series of erosions and dilations to remove
-# any small blobs of noise from the thresholded image
-
-#kernel = np.ones((5,5),np.uint8)
-kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2,3))
-thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
-thresh = cv2.erode(thresh,kernel,iterations = 1)
-thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-thresh = cv2.erode(thresh,kernel,iterations = 1)
-
-#cv2.imshow("th", thresh)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 
+    #blurred = cv2.GaussianBlur(gray, (11, 11), 0)
+    thresh = cv2.threshold(gray, 224, 250, cv2.THRESH_BINARY)[1]
 
+    # threshold the image to reveal light regions in the
+    # blurred image
 
-#thresh = cv2.erode(thresh, None, iterations=2)
-#thresh = cv2.dilate(thresh, None, iterations=4)
+    # perform a series of erosions and dilations to remove
+    # any small blobs of noise from the thresholded image
 
-# perform a connected component analysis on the thresholded
-# image, then initialize a mask to store only the "large"
-# components
-labels = measure.label(thresh, neighbors=4)
-mask = np.zeros(thresh.shape, dtype="uint8")
+    #kernel = np.ones((5,5),np.uint8)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2,3))
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+    thresh = cv2.erode(thresh,kernel,iterations = 1)
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+    thresh = cv2.erode(thresh,kernel,iterations = 1)
 
-# loop over the unique components
-for label in np.unique(labels):
-    # if this is the background label, ignore it
-    if label == 0:
-        continue
-
-    # otherwise, construct the label mask and count the
-    # number of pixels
-    labelMask = np.zeros(thresh.shape, dtype="uint8")
-    labelMask[labels == label] = 255
-    numPixels = cv2.countNonZero(labelMask)
-
-    # if the number of pixels in the component is sufficiently
-    # large, then add it to our mask of "large blobs"
-    #row = int(image.shape[1] / 60)
-    #col = int(image.shape[0] / 64)
-    if numPixels > 2000:
-        mask = cv2.add(mask, labelMask)
-
-
-# find the contours in the mask, then sort them from left to
-# right
-cnts = cv2.findContours(mask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-cnts = cnts[0] if imutils.is_cv2() else cnts[1]
-cnts = contours.sort_contours(cnts)[0]
-
-data=[]
-
-# loop over the contours
-for (i, c) in enumerate(cnts):
-    # draw the bright spot on the image
-    (x, y, w, h) = cv2.boundingRect(c)
-    cv2.rectangle(image, (x, y), (x + w, y + h), (30, 0, 255), 3)
-    cv2.putText(image, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
-    print(i+1,x,y,w,h)
-    if bubbleChecker(thresh,i+1,x,y,w,h) == 1 :
-        data.append([x,y,w,h])
-
-        #cv2.rectangle(image, (x,y),(x+w,y+h),(30, 0, 255), 3)
-        #cv2.putText(image, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
-
-
-    for [x,y,w,h] in data:
-        cv2.rectangle(image2, (x, y), (x + w, y + h), (30, 0, 255), 3)
-        cv2.putText(image2, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+    #cv2.imshow("th", thresh)
 
 
 
 
-# show the output image
-cv2.imshow("Image", image)
-cv2.imshow("Image2", image2)
+    #thresh = cv2.erode(thresh, None, iterations=2)
+    #thresh = cv2.dilate(thresh, None, iterations=4)
 
-cv2.waitKey(0)
+    # perform a connected component analysis on the thresholded
+    # image, then initialize a mask to store only the "large"
+    # components
+    labels = measure.label(thresh, neighbors=4)
+    mask = np.zeros(thresh.shape, dtype="uint8")
+
+    # loop over the unique components
+    for label in np.unique(labels):
+        # if this is the background label, ignore it
+        if label == 0:
+            continue
+
+        # otherwise, construct the label mask and count the
+        # number of pixels
+        labelMask = np.zeros(thresh.shape, dtype="uint8")
+        labelMask[labels == label] = 255
+        numPixels = cv2.countNonZero(labelMask)
+
+        # if the number of pixels in the component is sufficiently
+        # large, then add it to our mask of "large blobs"
+        #row = int(image.shape[1] / 60)
+        #col = int(image.shape[0] / 64)
+        if numPixels > 2000:
+            mask = cv2.add(mask, labelMask)
+
+
+    # find the contours in the mask, then sort them from left to
+    # right
+    cnts = cv2.findContours(mask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cnts[0] if imutils.is_cv2() else cnts[1]
+    cnts = contours.sort_contours(cnts)[0]
+
+    data=[]
+
+    # loop over the contours
+    for (i, c) in enumerate(cnts):
+        # draw the bright spot on the image
+        (x, y, w, h) = cv2.boundingRect(c)
+        cv2.rectangle(image, (x, y), (x + w, y + h), (30, 0, 255), 3)
+        cv2.putText(image, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 0, 0), 2)
+        print(i+1,x,y,w,h)
+        if bubbleChecker(thresh,i+1,x,y,w,h) == 1 :
+            data.append([x,y,w,h])
+
+            #cv2.rectangle(image, (x,y),(x+w,y+h),(30, 0, 255), 3)
+            #cv2.putText(image, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+
+
+        for [x,y,w,h] in data:
+            #cv2.rectangle(image2, (x, y), (x + w, y + h), (30, 0, 255), 3)
+            #cv2.putText(image2, "#{}".format(i + 1), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+
+
+
+
+    # show the output image
+    #cv2.imshow("Image", image)
+    #cv2.imshow("Image2", image2)
+
+    #cv2.waitKey(0)
+    
+    retrun data
 
 
 
