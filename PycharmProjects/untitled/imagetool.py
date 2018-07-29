@@ -86,9 +86,3 @@ def imgResizer(im):
     #cv2.imwrite('red.jpg', image)
 
     return image
-
-
-test= cv2.imread('000.jpg')
-cv2.imshow('af',test)
-cv2.waitKey(0)
-imgResizer(test)
