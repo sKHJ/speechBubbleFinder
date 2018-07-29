@@ -81,8 +81,8 @@ def imgResizer(im):
 
     image[0:r_img.shape[0],0:r_img.shape[1]] = r_img
 
-    cv2.imshow('af',image)
-    cv2.waitKey(0)
+    #cv2.imshow('af',image)
+    #cv2.waitKey(0)
     #cv2.imwrite('red.jpg', image)
 
     return image
