@@ -175,28 +175,55 @@ def bubbleFinder(image):
 
         if numPixels > 2000:
             mask = cv2.add(mask, labelMask)
-
+            
+    data=[]
     # find the contours in the mask, then sort them from left to
     # right
     cnts = cv2.findContours(mask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if imutils.is_cv2() else cnts[1]
+    
+    if len(cnts) == 0 :
+        return data
+   
     cnts = contours.sort_contours(cnts)[0]
 
-    data=[]
+    
+    class Cnt:
+        def __init__(self, x, y, w, h, area):
+            self.x = x
+            self.y = y
+            self.w = w
+            self.h = h
+            self.area = area
 
-    # loop over the contours
+        def __repr__(self):
+            return repr((self.x, self.y, self.w,self.h,self.area))
+
     for (i, c) in enumerate(cnts):
         # draw the bright spot on the image
         (x, y, w, h) = cv2.boundingRect(c)
-        #cv2.rectangle(image, (x, y), (x + w, y + h), (30, 0, 255), 3)
-        #cv2.putText(image, "#{}".format(i ), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 0, 0), 2)
-        
-        if bubbleChecker(gray,thresh,i,x,y,w,h) == 1 :
-            data.append([i,x,y,w,h])
-            #cv2.rectangle(image, (x,y),(x+w,y+h),(30, 0, 255), 3)
-            #cv2.putText(image, "#{}".format(i), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+        tmp =Cnt(x,y,w,h,w*h)
+        predata.append(tmp)
 
-    #for [i,x,y,w,h] in data:
+    sorted_pre = sorted(predata, key=lambda Cnt: Cnt.area)
+
+    i=0
+    for cnts in sorted_pre:
+        x=cnts.x
+        y=cnts.y
+        w=cnts.w
+        h=cnts.h
+        #cv2.rectangle(image, (x, y), (x + w, y + h), (30, 0, 255), 3)
+        #cv2.putText(image, "#{}".format(i), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 0, 0), 2)
+        print(i, x, y, w, h)
+        if bubbleChecker(gray, thresh, i, x, y, w, h) == 1:
+            data.append([x, y, w, h])
+
+            #cv2.rectangle(image, (x, y), (x + w, y + h), (30, 0, 255), 3)
+            #cv2.putText(image, "#{}".format(i), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+        i+=1
+
+    for [x,y,w,h] in data:
         #cv2.rectangle(image2, (x, y), (x + w, y + h), (30, 0, 255), 3)
         #cv2.putText(image2, "#{}".format(i), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
         
