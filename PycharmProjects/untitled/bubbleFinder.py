@@ -187,7 +187,7 @@ def bubbleFinder(image):
    
     cnts = contours.sort_contours(cnts)[0]
 
-    
+    predata=[]
     class Cnt:
         def __init__(self, x, y, w, h, area):
             self.x = x
