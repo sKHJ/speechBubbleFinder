@@ -6,6 +6,8 @@ import imutils
 import cv2
 import imagetool
 
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2,3))
+
 def bubbleChecker(ori,img,i,x,y,w,h):
     #1. blob size limit-------------------
 
@@ -146,7 +148,7 @@ def bubbleFinder(image):
 
     # perform a series of erosions and dilations to remove
     # any small blobs of noise from the thresholded image
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2,3))
+    
     thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
     thresh = cv2.erode(thresh,kernel,iterations = 1)
     thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
