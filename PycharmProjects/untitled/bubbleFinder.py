@@ -223,7 +223,7 @@ def bubbleFinder(image):
             #cv2.putText(image, "#{}".format(i), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
         i+=1
 
-    for [x,y,w,h] in data:
+    #for [x,y,w,h] in data:
         #cv2.rectangle(image2, (x, y), (x + w, y + h), (30, 0, 255), 3)
         #cv2.putText(image2, "#{}".format(i), (x, y - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
         
