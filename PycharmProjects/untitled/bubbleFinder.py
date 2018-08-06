@@ -7,8 +7,8 @@ import cv2
 import imagetool
 
 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2,3))
-
 def bubbleChecker(ori,img,i,x,y,w,h):
+
     #1. blob size limit-------------------
 
     rowMin = int(img.shape[1] / 35)  #minimal size limit
@@ -24,9 +24,9 @@ def bubbleChecker(ori,img,i,x,y,w,h):
         print('%d is deleted by size!' % i)
         return 0
 
-    if h * 1.5 < w :
-        print('%d is deleted by sizerate' % i)
-        return 0
+    #if h * 1.5 < w :
+    #    print('%d is deleted by sizerate' % i)
+    #    return 0
 
     #2. white pixel rate limit----------------------
     img_trim = img[y:y + h, x:x + w]
@@ -106,30 +106,28 @@ def bubbleChecker(ori,img,i,x,y,w,h):
         print('%d is deleted by TOO MANY vertical line:%d' % (i,vcount))
         return 0
 
-    if dcount >= (vcount/8) :
-        print('%d is deleted by diagonal line:%d' % (i, dcount))
-        return 0
+    #if dcount >= (vcount/8) :
+    #    print('%d is deleted by diagonal line:%d' % (i, dcount))
+    #    return 0
 
     ori_trim = ori[y:y + h, x:x + w]
     bcount = imagetool.blobDetect(ori_trim)
     ccount = imagetool.connectedComponentDetect(img_trim)
-    if bcount == 0:
-        print('%d is deleted by blob detection ... 0')
-        return 0
+    #if bcount == 0:
+    #    print('%d is deleted by blob detection ... 0')
+    #    return 0
 
     std = np.std(ori_trim.ravel())
 
     if std > 99:
         print('%d is deleted by histogram STD %d'%(i,std))
         return 0
-    
     '''
     forCNN = imagetool.imgResizer(ori_trim)
     if test(forCNN) is False:
         print('%d is deleted by CNN'%i)
         return 0
     '''
-    
     print('---------%d is selected! v:%d h:%d d:%d blob:%d STD:%d CC:%d----------' %(i,vcount,hcount,dcount,bcount,std,ccount))
 
     return 1
